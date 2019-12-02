@@ -36,6 +36,7 @@ module.exports = function(app) {
     .post(async function(req, res) {
       var title = req.body.title;
       //response will contain new book object including atleast _id and title
+      if (!title) return res.status(400).send('no title provided');
       let book = new Book({ title });
       await book.save();
       res.json(book);
@@ -52,7 +53,12 @@ module.exports = function(app) {
     .get(async function(req, res) {
       var bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
-      let book = await Book.find({ _id: bookid });
+      let book;
+      try {
+        book = await Book.find({ _id: bookid });
+      } catch (e) {
+        return res.status(400).send('no book by given id');
+      }
       res.json(book);
     })
 
@@ -61,6 +67,8 @@ module.exports = function(app) {
       var comment = req.body.comment;
       //json res format same as .get
 
+      // console.log(req.params);
+      // console.log(req.body);
       const book = await Book.findOneAndUpdate(
         { _id: bookid },
         { $push: { comments: comment } },
@@ -71,9 +79,11 @@ module.exports = function(app) {
     })
 
     .delete(async function(req, res) {
-      var bookid = req.params.id;
+      // console.log(req.params);
+      // console.log(req.query);
+      var bookid = req.params.id || req.query.id;
       //if successful response will be 'delete successful'
-      await Book.findOneAndDelete({ _id: bookid });
+      await Book.deleteOne({ _id: bookid });
       res.send('delete successful');
     });
 };
