@@ -22,6 +22,10 @@ var fccTestingRoutes = require('./routes/fcctesting.js');
 var runner = require('./test-runner');
 var app = express();
 
+const helmet = require('helmet');
+app.use(helmet());
+app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }));
+
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({ origin: '*' })); //USED FOR FCC TESTING PURPOSES ONLY!
